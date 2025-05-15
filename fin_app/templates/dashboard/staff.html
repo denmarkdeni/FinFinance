@@ -1,45 +1,71 @@
 {% extends 'dashboard/base.html' %}
 
 {% block content %}
+<br>
 <div class="d-flex justify-content-between align-items-center">
-    <h1 class="h2">Staff Dashboard</h1>
+    <h1 class="h2">Staff Dashboard</h1>welcome {{ request.user.username }}
     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createBudgetModal">
         Create New Budget
     </button>
-</div>
+</div><br>
+
+<div class="d-flex justify-content-around flex-wrap gap-3 ">
+    <a href="#" class="btn btn-outline-primary btn-lg d-flex flex-column align-items-center p-4 shadow rounded-3">
+        <div class="fs-4 fw-bold">₹ {{ total_budget }}</div>
+        <small>Total Budget</small>
+    </a>
+    <a href="#" class="btn btn-outline-success btn-lg d-flex flex-column align-items-center p-4 shadow rounded-3">
+        <div class="fs-4 fw-bold">₹ {{ remaining_budget }}</div>
+        <small>Remaining</small>
+    </a>
+    <a href="#" class="btn btn-outline-danger btn-lg d-flex flex-column align-items-center p-4 shadow rounded-3">
+        <div class="fs-4 fw-bold">₹ {{ spent }}</div>
+        <small>Spent</small>
+    </a>
+    <a href="#" class="btn btn-outline-info btn-lg d-flex flex-column align-items-center p-4 shadow rounded-3">
+        <div class="fs-4 fw-bold"> {{ finance_status }}</div>
+        <small>Finance Status</small>
+    </a>
+</div><br>
 
 <div class="row mt-4">
     <!-- Budget Summary -->
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Budget Summary</h4>
             </div>
             <div class="card-body">
-                <p>Total Budget: ₹500,000</p>
-                <p>Remaining Budget: ₹150,000</p>
-                <p>Spent: ₹350,000</p>
+                {% if budgets %}
+                    {% for budget in budgets %}
+                        <p><strong>{{ budget.title }} :</strong> ₹ {{ budget.total_amount }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>No budgets available.</p>
+                {% endif %}
+                <a href="{% url 'login' %}" class="btn btn-outline-primary ">More    </a>
             </div>
         </div>
     </div>
 
     <!-- Recent Expenses -->
-    <div class="col-md-8">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Recent Expenses</h4>
             </div>
             <div class="card-body">
                 <ul class="list-group">
-                    <li class="list-group-item">
-                        <strong>Expense 1</strong>: ₹50,000 - <span class="badge bg-success">Approved</span>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Expense 2</strong>: ₹25,000 - <span class="badge bg-warning">Pending</span>
-                    </li>
-                    <li class="list-group-item">
-                        <strong>Expense 3</strong>: ₹30,000 - <span class="badge bg-danger">Rejected</span>
-                    </li>
+                    {% if expenses %}
+                        {% for expense in expenses %}
+                            <li class="list-group-item">
+                                <strong>{{ expense.name }}</strong>: ₹{{ expense.amount }} - <span class="badge bg-success">{{ expense.status }}</span>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item">No recent expenses.</li>
+                    {% endif %}
+                    <li class="list-group-item"><a href="{% url 'login' %}" class="btn btn-outline-primary ">More</a></li>
                 </ul>
             </div>
         </div>
@@ -59,11 +85,11 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="budgetName" class="form-label">Budget Name</label>
-                        <input type="text" class="form-control" id="budgetName" name="budget_name" required>
+                        <input type="text" class="form-control" id="budgetName" name="title" required>
                     </div>
                     <div class="mb-3">
                         <label for="budgetAmount" class="form-label">Budget Amount</label>
-                        <input type="number" class="form-control" id="budgetAmount" name="budget_amount" required>
+                        <input type="number" class="form-control" id="budgetAmount" name="total_amount" required>
                     </div>
                     <div class="mb-3">
                         <label for="startDate" class="form-label">Start Date</label>
