@@ -11,42 +11,46 @@ from django.db.models import Sum
 def home_view(request):
     return render(request, 'home.html')
 
-def register_view(request):
+def auth_view(request):
+    form_login = AuthenticationForm(request, data=request.POST if 'signin' in request.POST else None)
+    form_register = RegisterForm(request.POST if 'signup' in request.POST else None)
+   
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Registration successful. Please log in.")
-            return redirect('login')
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})
+        if 'signup' in request.POST :
+            if form_register.is_valid():
+                form_register.save()
+                messages.success(request, "Registration successful. Please log in.")
+                return redirect('/auth/?show_login=true')
+            
+        elif 'signin' in request.POST :
+            if form_login.is_valid():
+                user = form_login.get_user()
+                login(request, user)
+                messages.success(request, "Login successful.")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Invalid Credentials.")
+                return redirect('/auth/?show_login=true')
+    
+    return render(request, 'auth.html', {
+        'form_login': form_login,
+        'form_register': form_register
+    })
 
 def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            return redirect('dashboard')
-        else:
-            messages.error(request, "Invalid credentials.")
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
+    return redirect('/auth/?show_login=true')
 
 def logout_view(request):
     logout(request)
-    return redirect('home')
+    messages.success(request, "Logout successful.")
+    return redirect('/auth/?show_login=true')
 
 @login_required
 def dashboard_view(request):
     role = request.user.profile.role
     if role == 'NormalUser':
-        print("opening normal dashboard")
         return redirect('normal_dashboard')
     elif role == 'CompanyStaff':
-        print("opening staff dashboard")
         return redirect('staff_dashboard')
     elif role == 'FinanceExpert':
         return redirect('expert_dashboard')
