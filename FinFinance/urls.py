@@ -35,10 +35,19 @@ urlpatterns = [
     path('dashboard/staff/', views.staff_dashboard, name='staff_dashboard'),
     path('dashboard/expert/', views.expert_dashboard, name='expert_dashboard'),
 
-    path('staff/create-budget/', views.create_budget, name='create_budget'),
-    path('staff/view-expenses/', views.view_expenses, name='view_expenses'),
-    path('staff/upload-expense/', views.upload_expense, name='upload_expense'),
+    path('profile/', views.profile, name='profile'),
+    path('profile/normal/', views.user_profile, name='user_profile'),
+    path('profile/staff/', views.staff_profile, name='staff_profile'),
+    path('profile/expert/', views.expert_profile, name='expert_profile'),
+
+    path('budgets/', views.budget_list, name='budget_list'),
+    path('budgets/create/', views.create_budget, name='create_budget'),
+    path('budgets/<int:budget_id>/', views.budget_detail, name='budget_detail'),
+
+    path('expenses/', views.expense_list, name='expense_list'),
+    path('expenses/add/', views.add_expense, name='add_expense'),
 
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

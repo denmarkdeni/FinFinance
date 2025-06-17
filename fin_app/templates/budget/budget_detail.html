@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Back to Budgets</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <div class="d-flex mb-4 justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Budget Details: {{ budget.month }}</h5>
+            <div class="dropdown">
+              <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+                class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
+                <i class="ti ti-dots-vertical fs-7 d-block"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="#">Edit Budget</a></li>
+                <li><a class="dropdown-item" href="#">Export</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="mb-4">
+            <h6>Total Income: ₹{{ budget.total_income }}</h6>
+            <h6>Total Budgeted: ₹{{ budget.total_budgeted }}</h6>
+            <h6>Total Spent: ₹{{ budget.total_spent }}</h6>
+            <h6>Status: 
+              {% if budget.total_spent > budget.total_budgeted %}
+                <span class="badge bg-light-danger rounded-pill text-danger px-3 py-2 fs-3">Overspent</span>
+              {% elif budget.total_spent == budget.total_budgeted %}
+                <span class="badge bg-light-warning rounded-pill text-warning px-3 py-2 fs-3">Fully Spent</span>
+              {% else %}
+                <span class="badge bg-light-success rounded-pill text-success px-3 py-2 fs-3">Within Budget</span>
+              {% endif %}
+            </h6>
+          </div>
+          <h6 class="fw-bold mb-3">Budget Categories</h6>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Limit</th>
+                  <th scope="col">Spent</th>
+                  <th scope="col">Remaining</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for category in budget.categories.all %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="me-4">
+                        <iconify-icon icon="solar:wallet-line-duotone" width="50" class="rounded-circle"></iconify-icon>
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ category.name }}</h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ category.limit }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ category.spent }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ category.remaining }}</p></td>
+                  <td>
+                    {% if category.spent > category.limit %}
+                      <span class="badge bg-light-danger rounded-pill text-danger px-3 py-2 fs-3">Overspent</span>
+                    {% elif category.spent == category.limit %}
+                      <span class="badge bg-light-warning rounded-pill text-warning px-3 py-2 fs-3">Fully Spent</span>
+                    {% else %}
+                      <span class="badge bg-light-success rounded-pill text-success px-3 py-2 fs-3">Within Budget</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No categories found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

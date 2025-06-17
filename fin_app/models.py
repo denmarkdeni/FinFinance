@@ -12,81 +12,69 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.role}"
+    
+# 1. User Profile (Normal Users)
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to='profile_pics/users/', default='profile_pics/default_user.jpg')
+    monthly_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    financial_goals = models.TextField(blank=True)
+    occupation = models.CharField(max_length=100, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Normal User"
+
+# 2. Staff Profile
+class StaffProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to='profile_pics/staff/', default='profile_pics/default_staff.jpg')
+    department = models.CharField(max_length=100, blank=True)
+    work_phone = models.CharField(max_length=15, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Staff"
+
+# 3. Finance Expert Profile
+class ExpertProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    profile_pic = models.ImageField(upload_to='profile_pics/experts/', default='profile_pics/default_expert.jpg')
+    bio = models.TextField(blank=True)
+    expertise_area = models.CharField(max_length=100, blank=True)
+    consultation_fee = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
+    available_times = models.CharField(max_length=100, blank=True)
+    certificates = models.FileField(upload_to='certificates/', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Expert"
 
 class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    total_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    month = models.CharField(max_length=20)  # e.g. 'June 2025'
+    total_income = models.DecimalField(max_digits=10, decimal_places=2)
+    total_budgeted = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    total_spent = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'month')  # One budget per user per month
 
     def __str__(self):
-        return f"{self.title} ({self.start_date} - {self.end_date})"
+        return f"{self.month} Budget for {self.user.username}"
 
 class BudgetCategory(models.Model):
-    budget = models.ForeignKey(Budget, related_name='categories', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    allocated_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    spent_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    budget = models.ForeignKey(Budget, on_delete=models.CASCADE, related_name='categories')
+    name = models.CharField(max_length=50)  # e.g. Food, Rent
+    limit = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.name} ({self.allocated_amount})"
-    
+        return f"{self.name} - ₹{self.limit}"
+
 class Expense(models.Model):
-    STATUS_CHOICES = (
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    )
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
-    budget = models.ForeignKey(Budget, on_delete=models.CASCADE,null=True, blank=True)
-    name = models.CharField(max_length=255) 
-    amount = models.DecimalField(max_digits=10, decimal_places=2) 
-    description = models.TextField(blank=True, null=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True) 
-
-    def __str__(self):
-        return f"{self.name} - {self.amount}"
-
-class EMIRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    principal_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    interest_rate = models.FloatField()
-    tenure_months = models.IntegerField()
-    calculated_emi = models.DecimalField(max_digits=12, decimal_places=2)
-    created_at = models.DateTimeField(auto_now_add=True)
+    category = models.ForeignKey(BudgetCategory, on_delete=models.CASCADE, related_name='expenses')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    note = models.TextField(blank=True)
+    date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"EMI for {self.user.username} - ₹{self.calculated_emi}/month"
-
-class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    platform = models.CharField(max_length=100)
-    category = models.CharField(max_length=100)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
-    date = models.DateField()
-    notes = models.TextField(blank=True, null=True)
-
-    def __str__(self):
-        return f"₹{self.amount} - {self.category} on {self.date}"
-
-class FinanceExpertProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    specialization = models.CharField(max_length=255)
-    bio = models.TextField()
-
-    def __str__(self):
-        return f"Expert: {self.user.username} - {self.specialization}"
-
-class AppointmentSlot(models.Model):
-    expert = models.ForeignKey(FinanceExpertProfile, on_delete=models.CASCADE)
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    is_booked = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Slot for {self.expert.user.username} on {self.date} ({self.start_time} - {self.end_time})"
-
+        return f"₹{self.amount} on {self.category.name} ({self.date})"

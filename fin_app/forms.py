@@ -1,7 +1,7 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
-from .models import Profile, Budget, BudgetCategory, EMIRecord, Payment
+from .models import Profile
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -19,8 +19,3 @@ class RegisterForm(UserCreationForm):
             if not user.is_superuser:
                 Profile.objects.filter(user=user).update(role=self.cleaned_data['role'])
         return user
-
-class BudgetForm(forms.ModelForm):
-    class Meta:
-        model = Budget
-        fields = ['title', 'total_amount', 'start_date', 'end_date']

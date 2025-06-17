@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block content %}
+
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Create New Budget</h5>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="POST" action="{% url 'create_budget' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="month" class="form-label fw-bold">Month/Year</label>
+              <input type="text" class="form-control" id="month" name="month" placeholder="e.g. June 2025" required>
+            </div>
+            <div class="mb-3">
+              <label for="total_income" class="form-label fw-bold">Total Income (₹)</label>
+              <input type="number" step="0.01" class="form-control" id="total_income" name="total_income" placeholder="Enter total income" required>
+            </div>
+            <div class="mb-3">
+              <h6 class="fw-bold">Budget Categories</h6>
+              <div id="category-list">
+                <div class="category-item mb-2 d-flex gap-3 align-items-center">
+                  <input type="text" class="form-control" name="categories" placeholder="Category (e.g. Food)" required>
+                  <input type="number" step="0.01" class="form-control" name="limits" placeholder="Limit (₹)" required>
+                  <button type="button" class="btn btn-outline-danger btn-sm remove-category">Remove</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-category">Add Category</button>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">Create Budget</button>
+              <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+document.getElementById('add-category').addEventListener('click', function() {
+  const categoryList = document.getElementById('category-list');
+  const newCategory = document.createElement('div');
+  newCategory.className = 'category-item mb-2 d-flex gap-3 align-items-center';
+  newCategory.innerHTML = `
+    <input type="text" class="form-control" name="categories" placeholder="Category (e.g. Food)" required>
+    <input type="number" step="0.01" class="form-control" name="limits" placeholder="Limit (₹)" required>
+    <button type="button" class="btn btn-outline-danger btn-sm remove-category">Remove</button>
+  `;
+  categoryList.appendChild(newCategory);
+});
+
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('remove-category')) {
+    if (document.querySelectorAll('.category-item').length > 1) {
+      e.target.parentElement.remove();
+    }
+  }
+});
+</script>
+{% endblock %}
