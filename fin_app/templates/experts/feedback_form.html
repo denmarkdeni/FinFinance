@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Submit Feedback for Session with {{ booking.expert.username }}</h5>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="rating" class="form-label">Rating (1-5)</label>
+              <select class="form-control" id="rating" name="rating" required>
+                <option value="">Select rating</option>
+                {% for i in "12345" %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="comment" class="form-label">Comment (optional)</label>
+              <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">Submit Feedback</button>
+              <a href="{% url 'booking_details' booking.id %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">My Notifications</h5>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Sender</th>
+                  <th scope="col">Message</th>
+                  <th scope="col">Received On</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for notification in notifications %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="me-4">
+                        <iconify-icon icon="solar:user-line-duotone" width="50" class="rounded-circle"></iconify-icon>
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ notification.sender.username }}</h6>
+                      </div>
+                    </td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ notification.message|truncatewords:15 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ notification.created_at|date:"d M Y, H:i" }}</p></td>
+                  <td><a href="{% url 'booking_details' notification.booking.id %}" class="btn btn-sm btn-outline-primary">View Booking</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">No notifications found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

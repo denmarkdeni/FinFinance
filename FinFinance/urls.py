@@ -43,10 +43,24 @@ urlpatterns = [
     path('budgets/', views.budget_list, name='budget_list'),
     path('budgets/create/', views.create_budget, name='create_budget'),
     path('budgets/<int:budget_id>/', views.budget_detail, name='budget_detail'),
+    path('budgets/<int:budget_id>/export-pdf/', views.export_budget_pdf, name='export_budget_pdf'),
 
     path('expenses/', views.expense_list, name='expense_list'),
     path('expenses/add/', views.add_expense, name='add_expense'),
 
+    path('features/emi-calculator/', views.emi_calculator, name='emi_calculator'),
+
+    path('experts/', views.experts_list, name='experts_list'),
+    path('experts/book/<int:expert_id>/', views.book_expert, name='book_expert'),
+    path('experts/appointments/', views.experts_appointments, name='experts_appointments'),
+
+    path('bookings/<int:booking_id>/', views.booking_details, name='booking_details'),
+    path('bookings/<int:booking_id>/feedback/', views.submit_feedback, name='submit_feedback'),
+    path('bookings/history/', views.booking_history, name='booking_history'),
+    path('bookings/<int:booking_id>/update-status/', views.update_booking_status, name='update_booking_status'),
+    path('bookings/<int:booking_id>/send-notification/', views.send_notification, name='send_notification'),
+
+    path('notifications/', views.notifications, name='notifications'),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])

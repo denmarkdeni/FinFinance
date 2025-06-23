@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'booking_history' %}" class="btn btn-outline-secondary">Back to Booking History</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Booking Details</h5>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <tbody>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">Expert</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.expert.username }}</p></td>
+                </tr>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">User</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.user.username }}</p></td>
+                </tr>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">Date and Time</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.date_time|date:"d M Y, H:i" }}</p></td>
+                </tr>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">Status</p></td>
+                  <td>
+                    <span class="badge {% if booking.status == 'Pending' %}bg-light-warning text-warning{% elif booking.status == 'Completed' %}bg-light-success text-success{% elif booking.status == 'Cancelled' %}bg-light-danger text-danger{% else %}bg-light-primary text-primary{% endif %} rounded-pill px-3 py-2 fs-3">{{ booking.status }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {% if booking.notifications.all %}
+          <h6 class="fw-bold mt-4">Notifications</h6>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <tbody>
+                {% for notification in booking.notifications.all %}
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">From {{ notification.sender.username }} ({{ notification.created_at|date:"d M Y, H:i" }})</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ notification.message }}</p></td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+          {% if request.user.profile.role == 'FinanceExpert' and request.user == booking.expert %}
+          <h6 class="fw-bold mt-4">Update Status</h6>
+          <form method="POST" action="{% url 'update_booking_status' booking.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="status" class="form-label">Status</label>
+              <select class="form-control" id="status" name="status" required>
+                <option value="Pending" {% if booking.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Confirmed" {% if booking.status == 'Confirmed' %}selected{% endif %}>Confirmed</option>
+                <option value="Completed" {% if booking.status == 'Completed' %}selected{% endif %}>Completed</option>
+                <option value="Cancelled" {% if booking.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+              </select>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">Update Status</button>
+            </div>
+          </form>
+          <h6 class="fw-bold mt-4">Send Notification</h6>
+          <form method="POST" action="{% url 'send_notification' booking.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="message" class="form-label">Message</label>
+              <textarea class="form-control" id="message" name="message" rows="3" placeholder="e.g., Confirmed for 25th June at 10 AM" required></textarea>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">Send Notification</button>
+            </div>
+          </form>
+          {% endif %}
+          {% if request.user.profile.role == 'NormalUser' and request.user == booking.user and booking.status == 'Completed' and not booking.feedback %}
+          <h6 class="fw-bold mt-4">Submit Feedback</h6>
+          <form method="POST" action="{% url 'submit_feedback' booking.id %}">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="rating" class="form-label">Rating (1-5)</label>
+              <select class="form-control" id="rating" name="rating" required>
+                <option value="">Select rating</option>
+                {% for i in "12345" %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="comment" class="form-label">Comment (optional)</label>
+              <textarea class="form-control" id="comment" name="comment" rows="3"></textarea>
+            </div>
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary">Submit Feedback</button>
+            </div>
+          </form>
+          {% elif booking.feedback %}
+          <h6 class="fw-bold mt-4">Feedback</h6>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <tbody>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">Rating</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.feedback.rating }} / 5</p></td>
+                </tr>
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">Comment</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.feedback.comment|default:"No comment" }}</p></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

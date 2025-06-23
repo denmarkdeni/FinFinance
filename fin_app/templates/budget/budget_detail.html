@@ -17,8 +17,7 @@
                 <i class="ti ti-dots-vertical fs-7 d-block"></i>
               </button>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
-                <li><a class="dropdown-item" href="#">Edit Budget</a></li>
-                <li><a class="dropdown-item" href="#">Export</a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#exportModal">Export</a></li>
               </ul>
             </div>
           </div>
@@ -49,7 +48,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for category in budget.categories.all %}
+                {% for category in categories %}
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
@@ -86,4 +85,23 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal for Export Confirmation -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exportModalLabel">Export Budget Summary</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Do you want to download the PDF summary for {{ budget.month }} budget?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a href="{% url 'export_budget_pdf' budget.id %}" class="btn btn-primary">Download PDF</a>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

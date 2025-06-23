@@ -1,10 +1,74 @@
 
-Work Flow
+🌀 WORKFLOWS
 
-    1. Login → Dashboard
-    2. Create Monthly Budget
-    3. Log Expenses (manually)
-    4. View Graphs/Charts
-    5. Get Alerts/Notifications
-    6. Edit/Delete Entries
-    7. View Monthly Summary
+    1. 🔐 Authentication & Role-Based Access
+
+        All users login through a single login form.
+
+        After login:
+
+        Normal user → Dashboard with personal finance tools.
+
+        Staff → Admin dashboard to manage user reports, categories.
+
+        Expert → Booking system and user queries.
+
+        Admin → Full control panel.
+
+    2. 💸 Budget Manager (Normal Users)
+
+        Create Budget → Add categories (Food, Rent, Travel, etc.)
+
+        Add Expenses to each category
+
+        Dashboard shows:
+
+        Total Budget
+
+        Category-wise Spent
+
+        Remaining Amount
+
+        Visual Pie/Bar Charts 📊
+
+    3. 📅 Payment Tracker (Normal Users)
+
+        Log recurring payments (like EMI, bills, subscriptions)
+
+        Due date reminders
+
+        Mark as Paid ✅
+
+        Optionally auto-track through future integrations (like UPI, bank APIs)
+
+    4. 👨‍🏫 Expert Booking System
+
+        Normal user selects an expert
+
+        Books a session (date & time)
+
+        Chat system or calendar integration possible
+
+        After session, feedback can be added
+
+    5. 🧑‍💻 Staff Responsibilities
+
+        Verify reports (eg. suspicious expenses)
+
+        Manage budget category templates
+
+        Moderate user activities if flagged
+
+        Can generate analytics for Admin
+
+    6. ⚙️ Admin Panel
+
+        View all users by roles
+
+        Add/Edit/Delete staff and experts
+
+        Global settings (tax config, default limits, notification toggles)
+
+        Payment logs of users
+
+        Site-wide analytics 📈

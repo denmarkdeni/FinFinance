@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+      <a href="{% url 'booking_history' %}" class="btn btn-outline-primary">Booking History</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Finance Experts</h5>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Expert</th>
+                  <th scope="col">Expertise</th>
+                  <th scope="col">Consultation Fee</th>
+                  <th scope="col">Available Times</th>
+                  <th scope="col">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for expert in experts %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="{{ expert.profile_pic.url }}" width="50" class="rounded-circle me-4" alt="Profile Picture">
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ expert.user.username }}</h6>
+                        <p class="fs-3 mb-0">{{ expert.bio|truncatewords:10 }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ expert.expertise_area|default:"Not specified" }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ expert.consultation_fee|default:"Not specified" }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ expert.available_times|default:"Not specified" }}</p></td>
+                  <td><a href="{% url 'book_expert' expert.user.id %}" class="btn btn-sm btn-primary">Book Now</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No experts available.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

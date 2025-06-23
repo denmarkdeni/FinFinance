@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Book a Session with {{ expert.user.username }}</h5>
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+          <form method="POST">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="date_time" class="form-label">Date and Time (within {{ expert.available_times }})</label>
+              <input type="datetime-local" class="form-control" id="date_time" name="date_time" required>
+            </div>
+            {% comment %} <div class="mb-3">
+              <label for="note" class="form-label">Note (optional)</label>
+              <textarea class="form-control" id="note" name="note" rows="3" placeholder="e.g., Discuss investment plans"></textarea>
+            </div> {% endcomment %}
+            <div class="d-flex gap-3">
+              <button type="submit" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirmBookingModal">Book Session</button>
+              <a href="{% url 'experts_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal for Booking Confirmation -->
+<div class="modal fade" id="confirmBookingModal" tabindex="-1" aria-labelledby="confirmBookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmBookingModalLabel">Confirm Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to book a session with {{ expert.user.username }}?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="book_expert_form" class="btn btn-primary">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  document.querySelector('#confirmBookingModal').addEventListener('click', function(event) {
+    if (event.target.type === 'submit') {
+      document.querySelector('form').submit();
+    }
+  }, { once: true });
+});
+</script>
+{% endblock %}

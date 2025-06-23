@@ -1,19 +1,22 @@
 $(function () {
-
-
   // =====================================
-  // Profit
+  // Users & Budget (Bar Chart)
   // =====================================
-  var profit = {
+  let chartData;
+  try {
+    chartData = JSON.parse(document.getElementById('chart-data').textContent);
+  } catch (e) {
+    console.error('Failed to parse chart data:', e);
+    return;
+  }
+
+  const budgetChartData = chartData.budget_chart_data || { labels: [], data: [] };
+  const profit = {
     series: [
       {
-        name: "Pixel ",
-        data: [9, 5, 3, 7, 5, 10, 3],
-      },
-      {
-        name: "Ample ",
-        data: [6, 3, 9, 5, 4, 6, 4],
-      },
+        name: "Total Budgeted",
+        data: budgetChartData.data
+      }
     ],
     chart: {
       fontFamily: "Poppins,sans-serif",
@@ -29,7 +32,7 @@ $(function () {
       strokeDashArray: 3,
       borderColor: "rgba(0,0,0,.1)",
     },
-    colors: ["#1e88e5", "#21c1d6"],
+    colors: ["var(--bs-primary)"],
     plotOptions: {
       bar: {
         horizontal: false,
@@ -47,7 +50,7 @@ $(function () {
     },
     xaxis: {
       type: "category",
-      categories: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      categories: budgetChartData.labels.length ? budgetChartData.labels : ['No Data'],
       axisTicks: {
         show: false,
       },
@@ -61,18 +64,32 @@ $(function () {
       },
     },
     yaxis: {
+      title: {
+        text: 'Total Budgeted (₹)',
+        style: {
+          color: "#a1aab2",
+        },
+      },
       labels: {
         style: {
           colors: "#a1aab2",
+        },
+        formatter: function (val) {
+          return "₹" + val.toFixed(0);
         },
       },
     },
     fill: {
       opacity: 1,
-      colors: ["var(--bs-primary)", "var(--bs-danger)"],
+      colors: ["var(--bs-primary)"],
     },
     tooltip: {
       theme: "dark",
+      y: {
+        formatter: function (val) {
+          return "₹" + val;
+        },
+      },
     },
     legend: {
       show: false,
@@ -91,40 +108,36 @@ $(function () {
     ],
   };
 
-  var chart_column_basic = new ApexCharts(
-    document.querySelector("#profit"),
+  const chart_column_basic = new ApexCharts(
+    document.querySelector("#budget-chart"),
     profit
   );
   chart_column_basic.render();
 
-
   // =====================================
-  // Breakup
+  // Total Users (Donut Chart)
   // =====================================
-  var grade = {
-    series: [5368, 3500, 4106],
-    labels: ["5368", "Refferal Traffic", "Oragnic Traffic"],
+  const userRoleData = chartData.user_role_data || { labels: [], data: [] };
+  const grade = {
+    series: userRoleData.data.length ? userRoleData.data : [1],
+    labels: userRoleData.labels.length ? userRoleData.labels : ['No Data'],
     chart: {
       height: 170,
       type: "donut",
-      fontFamily: "Plus Jakarta Sans', sans-serif",
+      fontFamily: "Plus Jakarta Sans, sans-serif",
       foreColor: "#c6d1e9",
     },
-
     tooltip: {
       theme: "dark",
       fillSeriesColor: false,
     },
-
-    colors: ["#e7ecf0", "#fb977d", "var(--bs-primary)"],
+    colors: ["#e7ecf0", "var(--bs-primary)", "var(--bs-danger)"],
     dataLabels: {
       enabled: false,
     },
-
     legend: {
       show: false,
     },
-
     stroke: {
       show: false,
     },
@@ -152,8 +165,11 @@ $(function () {
               offsetY: 5,
             },
             value: {
-              show: false,
+              show: true,
               color: "#98aab4",
+              formatter: function (val) {
+                return val;
+              },
             },
           },
         },
@@ -161,16 +177,14 @@ $(function () {
     },
   };
 
-  var chart = new ApexCharts(document.querySelector("#grade"), grade);
+  const chart = new ApexCharts(document.querySelector("#grade"), grade);
   chart.render();
 
-
-
-
   // =====================================
-  // Earning
+  // Total Budgets (Area Chart)
   // =====================================
-  var earning = {
+  const budgetTrendData = chartData.budget_trend_data || { labels: [], data: [] };
+  const earning = {
     chart: {
       id: "sparkline3",
       type: "area",
@@ -179,14 +193,14 @@ $(function () {
         enabled: true,
       },
       group: "sparklines",
-      fontFamily: "Plus Jakarta Sans', sans-serif",
+      fontFamily: "Plus Jakarta Sans, sans-serif",
       foreColor: "#adb0bb",
     },
     series: [
       {
-        name: "Earnings",
+        name: "Total Budgeted",
         color: "#8763da",
-        data: [25, 66, 20, 40, 12, 58, 20],
+        data: budgetTrendData.data.length ? budgetTrendData.data : [0],
       },
     ],
     stroke: {
@@ -198,9 +212,11 @@ $(function () {
       type: "solid",
       opacity: 0.05,
     },
-
     markers: {
       size: 0,
+    },
+    xaxis: {
+      categories: budgetTrendData.labels.length ? budgetTrendData.labels : ['No Data'],
     },
     tooltip: {
       theme: "dark",
@@ -209,9 +225,18 @@ $(function () {
         position: "right",
       },
       x: {
-        show: false,
+        show: true,
+        formatter: function (val, { dataPointIndex }) {
+          return budgetTrendData.labels[dataPointIndex] || 'No Data';
+        },
+      },
+      y: {
+        formatter: function (val) {
+          return "₹" + val;
+        },
       },
     },
   };
+
   new ApexCharts(document.querySelector("#earning"), earning).render();
-})
+});
