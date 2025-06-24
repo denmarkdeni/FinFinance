@@ -162,7 +162,7 @@
               <li class="sidebar-item">
                 <a
                   class="sidebar-link primary-hover-bg justify-content-between"
-                  href="{% url 'dashboard' %}"
+                  href="{% url 'user_management' %}"
                   aria-expanded="false"
                 >
                   <div class="d-flex align-items-center gap-6">
@@ -176,7 +176,7 @@
               <li class="sidebar-item">
                 <a
                   class="sidebar-link primary-hover-bg justify-content-between"
-                  href="{% url 'dashboard' %}"
+                  href="{% url 'experts_history' %}"
                   aria-expanded="false"
                 >
                   <div class="d-flex align-items-center gap-6">
@@ -205,22 +205,7 @@
                   </div>
                 </a>
               </li>
-              <li class="sidebar-item">
-                <a
-                  class="sidebar-link primary-hover-bg justify-content-between"
-                  href="{% url 'dashboard' %}"
-                  aria-expanded="false"
-                >
-                  <div class="d-flex align-items-center gap-6">
-                    <span class="d-flex">
-                      <iconify-icon
-                        icon="solar:chart-line-duotone"
-                      ></iconify-icon>
-                    </span>
-                    <span class="hide-menu">Analytics</span>
-                  </div>
-                </a>
-              </li>
+              
 
               {% elif request.user.profile.role == 'NormalUser' %}
 

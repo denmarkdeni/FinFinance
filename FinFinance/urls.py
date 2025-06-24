@@ -35,6 +35,10 @@ urlpatterns = [
     path('dashboard/staff/', views.staff_dashboard, name='staff_dashboard'),
     path('dashboard/expert/', views.expert_dashboard, name='expert_dashboard'),
 
+    path('dashboard/admin/users/', views.user_management, name='user_management'),
+    path('dashboard/admin/users/<int:user_id>/toggle-status/', views.toggle_user_status, name='toggle_user_status'),
+    path('dashboard/admin/experts/history/', views.experts_history, name='experts_history'),
+
     path('profile/', views.profile, name='profile'),
     path('profile/normal/', views.user_profile, name='user_profile'),
     path('profile/staff/', views.staff_profile, name='staff_profile'),

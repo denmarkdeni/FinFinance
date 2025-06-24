@@ -1,14 +1,18 @@
+
 $(function () {
+
   // =====================================
   // Users & Budget (Bar Chart)
   // =====================================
   let chartData;
   try {
     chartData = JSON.parse(document.getElementById('chart-data').textContent);
+    console.log("Chart data:", chartData);
   } catch (e) {
-    console.error('Failed to parse chart data:', e);
+    console.error('JSON parse error:', e, document.getElementById('chart-data').textContent);
     return;
   }
+  console.log("Script running");
 
   const budgetChartData = chartData.budget_chart_data || { labels: [], data: [] };
   const profit = {
@@ -131,7 +135,7 @@ $(function () {
       theme: "dark",
       fillSeriesColor: false,
     },
-    colors: ["#e7ecf0", "var(--bs-primary)", "var(--bs-danger)"],
+    colors: [ "var(--bs-primary)","var(--bs-danger)", "var(--bs-success)"],
     dataLabels: {
       enabled: false,
     },

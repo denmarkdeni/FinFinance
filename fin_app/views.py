@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
@@ -99,8 +99,8 @@ def admin_dashboard(request):
 
     # Top Budget Managers
     top_managers = User.objects.filter(profile__role='NormalUser').annotate(
-        total_budgeted=Sum('budget_set__total_budgeted'),
-        budget_count=Count('budget_set')
+        total_budgeted=Sum('budget__total_budgeted'),
+        budget_count=Count('budget')
     ).order_by('-total_budgeted')[:4]
 
     # Budget Graph Data (Users & Budget)
@@ -108,13 +108,13 @@ def admin_dashboard(request):
         total=Sum('total_budgeted')
     ).order_by('month')
     budget_chart_data = {
-        'labels': [b['month'].strftime('%B %Y') for b in budget_data],
+        'labels': [b['month'] for b in budget_data],
         'data': [float(b['total'] or 0) for b in budget_data]
     }
 
     # User Role Data (Total Users Donut Chart)
     user_role_data = {
-        'labels': ['Normal Users', 'Finance Experts', 'Company Staff'],
+        'labels': ['Normal Users', 'Experts', 'Staffs'],
         'data': [
             Profile.objects.filter(role='NormalUser').count(),
             Profile.objects.filter(role='FinanceExpert').count(),
@@ -128,7 +128,7 @@ def admin_dashboard(request):
         total=Sum('total_budgeted')
     ).order_by('month')
     budget_trend_data = {
-        'labels': [b['month'].strftime('%b %Y') for b in budget_trend],
+        'labels': [b['month'] for b in budget_trend],
         'data': [float(b['total'] or 0) for b in budget_trend]
     }
 
@@ -485,7 +485,7 @@ def book_expert(request, expert_id):
 def booking_details(request, booking_id):
     try:
         booking = Booking.objects.get(id=booking_id)
-        if request.user != booking.user and request.user != booking.expert:
+        if request.user != booking.user and request.user != booking.expert and request.user.profile.role != 'Admin':
             raise Http404("You don't have permission to view this booking.")
         return render(request, 'experts/booking_details.html', {'booking': booking})
     except Booking.DoesNotExist:
@@ -586,3 +586,33 @@ def send_notification(request, booking_id):
 def notifications(request):
     notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')
     return render(request, 'features/notifications.html', {'notifications': notifications})
+
+@login_required
+def user_management(request):
+    if request.user.profile.role != 'Admin':
+        messages.error(request, 'Only company Admin can access user management.')
+        return redirect('dashboard')
+    users = User.objects.select_related('profile').all()
+    return render(request, 'admin/user_management.html', {'users': users})
+
+@login_required
+def toggle_user_status(request, user_id):
+    if request.user.profile.role != 'Admin':
+        messages.error(request, 'Only Admin can modify user status.')
+        return redirect('dashboard')
+    user = get_object_or_404(User, id=user_id)
+    if user == request.user:
+        messages.error(request, 'Cannot modify your own status.')
+        return redirect('user_management')
+    user.is_active = not user.is_active
+    user.save()
+    messages.success(request, f'User {user.username} {"activated" if user.is_active else "deactivated"} successfully.')
+    return redirect('user_management')
+
+@login_required
+def experts_history(request):
+    if request.user.profile.role != 'Admin':
+        messages.error(request, 'Only company Admin can access expert booking history.')
+        return redirect('budget_list')
+    bookings = Booking.objects.select_related('user', 'expert', 'expert__profile').order_by('-date_time')
+    return render(request, 'admin/experts_history.html', {'bookings': bookings})

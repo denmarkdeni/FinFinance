@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Expert Booking History</h5>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Expert</th>
+                  <th scope="col">Client</th>
+                  <th scope="col">Date & Time</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="me-4">
+                        <img src="{{ booking.expert.profile.profile_pic.url|default:'/static/dashFiles/images/profile/user1.jpg' }}" width="50" class="rounded-circle" alt="" />
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ booking.expert.username }}</h6>
+                        <p class="fs-3 mb-0">{{ booking.expert.profile.occupation|default:"Finance Expert" }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.user.username }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ booking.date_time|date:"d M Y, H:i" }}</p></td>
+                  <td>
+                    <span class="badge {% if booking.status == 'Pending' %}bg-light-warning text-warning{% elif booking.status == 'Completed' %}bg-light-success text-success{% elif booking.status == 'Cancelled' %}bg-light-danger text-danger{% else %}bg-light-primary text-primary{% endif %} rounded-pill px-3 py-2 fs-3">
+                      {{ booking.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'booking_details' booking.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No bookings found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

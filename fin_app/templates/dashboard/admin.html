@@ -21,7 +21,7 @@
               </ul>
             </div>
           </div>
-          <canvas id="budget-chart" style="width: 100%; height: 360px;"></canvas>
+          <div id="budget-chart" style="width: 100%; height: 360px;"></div>
         </div>
       </div>
     </div>
@@ -44,17 +44,21 @@
                   <div class="d-flex align-items-center">
                     <div class="me-3">
                       <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                      <span class="fs-2">Normal Users</span>
+                      <span class="fs-2">Users</span>
                     </div>
                     <div>
                       <span class="round-8 bg-danger rounded-circle me-2 d-inline-block"></span>
                       <span class="fs-2">Experts</span>
                     </div>
+                    <div>
+                      <span class="round-8 bg-success rounded-circle me-2 d-inline-block"></span>
+                      <span class="fs-2">Staffs</span>
+                    </div>
                   </div>
                 </div>
                 <div class="col-5">
                   <div class="d-flex justify-content-center">
-                    <canvas id="grade" style="width: 150px; height: 150px;"></canvas>
+                    <div id="grade" style="width: 150px; height: 150px;"></div>
                   </div>
                 </div>
               </div>
@@ -85,7 +89,7 @@
                 </div>
               </div>
             </div>
-            <canvas id="earning" style="width: 100%; height: 60px;"></canvas>
+            <div id="earning" style="width: 100%; height: 60px;"></div>
           </div>
         </div>
       </div>
@@ -152,7 +156,7 @@
                   <td>
                     <div class="d-flex align-items-center">
                       <div class="me-4">
-                        <img src="{{ manager.profile_pic.url|default:'/static/dashFiles/images/profile/user1.jpg' }}" width="50" class="rounded-circle" alt="" />
+                        <img src="{{ manager.userprofile.profile_pic.url|default:'/static/dashFiles/images/profile/user1.jpg' }}" width="50" class="rounded-circle" alt="" />
                       </div>
                       <div>
                         <h6 class="mb-1 fw-bolder">{{ manager.username }}</h6>
@@ -180,6 +184,7 @@
       </div>
     </div>
   </div>
+
 <script id="chart-data" type="application/json">
 {
   "budget_chart_data": {{ budget_chart_data|safe }},
@@ -187,5 +192,5 @@
   "budget_trend_data": {{ budget_trend_data|safe }}
 }
 </script>
-<script src="{% static 'dashFiles/js/dashboard.js' %}"></script>
+
 {% endblock %}

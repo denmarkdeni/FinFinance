@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">User Management</h5>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Username</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for user in users %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="me-4">
+                        <img src="{{ user.profile.profile_pic.url|default:'/static/dashFiles/images/profile/user1.jpg' }}" width="50" class="rounded-circle" alt="" />
+                      </div>
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ user.username }}</h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ user.email }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ user.profile.role }}</p></td>
+                  <td>
+                    <span class="badge {% if user.is_active %}bg-light-success text-success{% else %}bg-light-danger text-danger{% endif %} rounded-pill px-3 py-2 fs-3">
+                      {{ user.is_active|yesno:"Active,Inactive" }}
+                    </span>
+                  </td>
+                  <td>
+                    <a href="{% url 'toggle_user_status' user.id %}" class="btn btn-sm {% if user.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                      {{ user.is_active|yesno:"Deactivate,Activate" }}
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center">No users found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
