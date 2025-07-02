@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Company Transaction Management</h5>
+          <div class="mb-4">
+            <form method="get" class="d-flex align-items-center">
+              <select name="month" class="form-select me-2" style="width: 200px;">
+                {% for month in distinct_months %}
+                <option value="{{ month.month }}" {% if month.month == month_filter %}selected{% endif %}>{{ month.month }}</option>
+                {% endfor %}
+              </select>
+              <select name="category" class="form-select me-2" style="width: 200px;">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if category == category_filter %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+          </div>
+          <div class="mb-4">
+            <h6>Total Income: ₹{{ total_income|floatformat:2 }}</h6>
+            <h6>Total Expenses: ₹{{ total_expenses|floatformat:2 }}</h6>
+            <h6>Net Balance: ₹{{ net_balance|floatformat:2 }}</h6>
+            <a href="{% url 'transaction_summary' month=month_filter %}" class="btn btn-outline-primary mt-2">View Month-End Summary</a>
+          </div>
+          <form method="post">
+            {% csrf_token %}
+            <div class="row mb-3">
+              <div class="col-md-3">
+                <select name="type" class="form-select" required>
+                  <option value="Incoming">Incoming</option>
+                  <option value="Outgoing">Outgoing</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <input type="number" name="amount" class="form-control" placeholder="Amount" step="0.01" required>
+              </div>
+              <div class="col-md-2">
+                <input type="date" name="date" class="form-control" required>
+              </div>
+              <div class="col-md-2">
+                <input type="text" name="payee_payer" class="form-control" placeholder="Payee/Payer" required>
+              </div>
+              <div class="col-md-2">
+                <input type="text" name="category" class="form-control" placeholder="Category" required>
+              </div>
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-primary">Add</button>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <input type="text" name="description" class="form-control" placeholder="Description (optional)">
+              </div>
+            </div>
+            <input type="hidden" name="month" value="{{ month_filter }}">
+          </form>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Payee/Payer</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.date|date:"d M Y" }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.type }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.payee_payer }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.category }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ transaction.amount|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.description|truncatechars:50 }}</p></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">No transactions found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

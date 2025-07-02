@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'company_transaction' %}" class="btn btn-outline-secondary">Back to Transactions</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Transaction Summary - {{ month }}</h5>
+          <div class="mb-4">
+            <h6>Total Income: ₹{{ total_income|floatformat:2 }}</h6>
+            <h6>Total Expenses: ₹{{ total_expenses|floatformat:2 }}</h6>
+            <h6>Net Balance: ₹{{ net_balance|floatformat:2 }}</h6>
+            <a href="?export=csv" class="btn btn-outline-primary me-2">Export as CSV</a>
+            <a href="?export=pdf" class="btn btn-outline-primary">Export as PDF</a>
+          </div>
+          <div id="transaction-chart" style="width: 100%; height: 300px;"></div>
+          <div class="table-responsive mt-4" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Payee/Payer</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.date|date:"d M Y" }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.type }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.payee_payer }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.category }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ transaction.amount|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.description|truncatechars:50 }}</p></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">No transactions found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script id="transaction-data" type="application/json">{{ transaction_data|safe }}</script>
+{% endblock %}

@@ -296,16 +296,64 @@
               <li class="sidebar-item">
                 <a
                   class="sidebar-link primary-hover-bg justify-content-between"
-                  href="{% url 'dashboard' %}"
+                  href="{% url 'company_transaction' %}"
                   aria-expanded="false"
                 >
                   <div class="d-flex align-items-center gap-6">
                     <span class="d-flex">
                       <iconify-icon
-                        icon="mdi:credit-card-outline"
+                        icon="solar:bill-list-line-duotone"
                       ></iconify-icon>
                     </span>
-                    <span class="hide-menu">Payments Tracker</span>
+                    <span class="hide-menu">Company Finance</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link primary-hover-bg justify-content-between"
+                  href="{% url 'budget_list' %}"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-6">
+                    <span class="d-flex">
+                      <iconify-icon
+                        icon="solar:wallet-line-duotone"
+                      ></iconify-icon>
+                    </span>
+                    <span class="hide-menu">Budgets</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link primary-hover-bg justify-content-between"
+                  href="{% url 'expense_list' %}"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-6">
+                    <span class="d-flex">
+                      <iconify-icon
+                        icon="solar:card-line-duotone"
+                      ></iconify-icon>
+                    </span>
+                    <span class="hide-menu">Expenses</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link primary-hover-bg justify-content-between"
+                  href="{% url 'emi_calculator' %}"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-6">
+                    <span class="d-flex">
+                      <iconify-icon
+                        icon="solar:calculator-line-duotone"
+                      ></iconify-icon>
+                    </span>
+                    <span class="hide-menu">EMI Calculator</span>
                   </div>
                 </a>
               </li>
@@ -325,6 +373,22 @@
                       ></iconify-icon>
                     </span>
                     <span class="hide-menu">Appointments</span>
+                  </div>
+                </a>
+              </li>
+              <li class="sidebar-item">
+                <a
+                  class="sidebar-link primary-hover-bg justify-content-between"
+                  href="{% url 'emi_calculator' %}"
+                  aria-expanded="false"
+                >
+                  <div class="d-flex align-items-center gap-6">
+                    <span class="d-flex">
+                      <iconify-icon
+                        icon="solar:calculator-line-duotone"
+                      ></iconify-icon>
+                    </span>
+                    <span class="hide-menu">EMI Calculator</span>
                   </div>
                 </a>
               </li>
@@ -461,8 +525,10 @@
     <script src="/static/dashFiles/js/app.min.js"></script>
     <script src="/static/dashFiles/libs/apexcharts/dist/apexcharts.min.js"></script>
     <script src="/static/dashFiles/libs/simplebar/dist/simplebar.js"></script>
+    <script src="/static/dashFiles/js/transaction.js"></script>
     <script src="/static/dashFiles/js/dashboard.js"></script>
     <!-- solar icons -->
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
+
   </body>
 </html>

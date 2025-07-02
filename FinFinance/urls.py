@@ -58,6 +58,9 @@ urlpatterns = [
     path('experts/book/<int:expert_id>/', views.book_expert, name='book_expert'),
     path('experts/appointments/', views.experts_appointments, name='experts_appointments'),
 
+    path('staff/transactions/', views.company_transaction_management, name='company_transaction'),
+    path('staff/transactions/summary/<str:month>/', views.transaction_summary, name='transaction_summary'),
+
     path('bookings/<int:booking_id>/', views.booking_details, name='booking_details'),
     path('bookings/<int:booking_id>/feedback/', views.submit_feedback, name='submit_feedback'),
     path('bookings/history/', views.booking_history, name='booking_history'),

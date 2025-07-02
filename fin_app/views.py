@@ -6,8 +6,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
 from django.utils import timezone
 from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
 from django.contrib.auth.models import User
-from .models import Profile, UserProfile, StaffProfile, ExpertProfile
+from .models import Profile, UserProfile, StaffProfile, ExpertProfile, CompanyTransaction
 from .models import Budget, BudgetCategory, Expense, Booking, Feedback, Notification 
 from .forms import RegisterForm
 from decimal import Decimal
@@ -17,7 +18,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-import io, json, math
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter, landscape
+from io import BytesIO
+import io, json, math, csv
 
 def home_view(request):
     return render(request, 'home.html')
@@ -78,6 +82,7 @@ def expert_dashboard(request):
     return render(request, 'dashboard/expert.html')
 
 def staff_dashboard(request):
+
     return render(request, 'dashboard/staff.html')
 
 @login_required
@@ -616,3 +621,190 @@ def experts_history(request):
         return redirect('budget_list')
     bookings = Booking.objects.select_related('user', 'expert', 'expert__profile').order_by('-date_time')
     return render(request, 'admin/experts_history.html', {'bookings': bookings})
+
+@login_required
+def company_transaction_management(request):
+    if request.user.profile.role != 'CompanyStaff':
+        messages.error(request, 'Only company staff can access transaction management.')
+        return redirect('dashboard')
+    
+    current_month = timezone.now().strftime('%B %Y')
+    month_filter = request.GET.get('month', current_month)
+    category_filter = request.GET.get('category', '')
+    
+    transactions = CompanyTransaction.objects.filter(month=month_filter)
+    if category_filter:
+        transactions = transactions.filter(category=category_filter)
+    
+    categories = CompanyTransaction.objects.values('category').distinct().order_by('category')
+    
+    if request.method == 'POST':
+        type = request.POST.get('type')
+        amount = request.POST.get('amount')
+        date = request.POST.get('date')
+        payee_payer = request.POST.get('payee_payer')
+        category = request.POST.get('category')
+        description = request.POST.get('description', '')
+        month = request.POST.get('month', current_month)
+        
+        try:
+            amount = float(amount)
+            date = datetime.strptime(date, '%Y-%m-%d').date()
+            CompanyTransaction.objects.create(
+                created_by=request.user,
+                type=type,
+                amount=amount,
+                date=date,
+                payee_payer=payee_payer,
+                month=month,
+                category=category,
+                description=description
+            )
+            messages.success(request, 'Transaction added successfully.')
+            return redirect('company_transaction')
+        except ValueError:
+            messages.error(request, 'Invalid amount or date format.')
+    
+    total_income = transactions.filter(type='Incoming').aggregate(total=Sum('amount'))['total'] or 0
+    total_expenses = transactions.filter(type='Outgoing').aggregate(total=Sum('amount'))['total'] or 0
+    net_balance = total_income - total_expenses
+    
+    transaction_data = {
+        'labels': ['Income', 'Expenses'],
+        'data': [float(total_income), float(total_expenses)]
+    }
+    # distinct_months = CompanyTransaction.objects.values('month').distinct().order_by('-date')
+
+    distinct_months = (
+        CompanyTransaction.objects
+        .annotate(months=TruncMonth('date'))
+        .values('month')
+        .distinct()
+        .order_by('-month')
+    )
+
+    # formatted_months = [m['month'].strftime('%B %Y') for m in distinct_months]
+    
+    context = {
+        'transactions': transactions.order_by('-date'),
+        'distinct_months': distinct_months ,
+        'categories': [c['category'] for c in categories if c['category']],
+        'month_filter': month_filter,
+        'category_filter': category_filter,
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'net_balance': net_balance,
+        'transaction_data': json.dumps(transaction_data, default=str)
+    }
+    return render(request, 'staff/company_transaction.html', context)
+
+@login_required
+def transaction_summary(request, month):
+    if request.user.profile.role != 'CompanyStaff':
+        messages.error(request, 'Only company staff can access transaction summary.')
+        return redirect('dashboard')
+    
+    transactions = CompanyTransaction.objects.filter(month=month).order_by('-date')
+    total_income = transactions.filter(type='Incoming').aggregate(total=Sum('amount'))['total'] or 0
+    total_expenses = transactions.filter(type='Outgoing').aggregate(total=Sum('amount'))['total'] or 0
+    net_balance = total_income - total_expenses
+    
+    transaction_data = {
+        'labels': ['Income', 'Expenses'],
+        'data': [float(total_income), float(total_expenses)]
+    }
+    
+    context = {
+        'month': month,
+        'transactions': transactions,
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'net_balance': net_balance,
+        'transaction_data': json.dumps(transaction_data, default=str)
+    }
+    
+    if 'export' in request.GET:
+        export_type = request.GET.get('export')
+        if export_type == 'csv':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="transaction_summary_{month}.csv"'
+            writer = csv.writer(response)
+            writer.writerow(['Date', 'Type', 'Payee/Payer', 'Category', 'Amount', 'Description'])
+            for t in transactions:
+                writer.writerow([t.date, t.type, t.payee_payer, t.category, t.amount, t.description])
+            writer.writerow([])
+            writer.writerow(['Total Income', '', '', '', total_income, ''])
+            writer.writerow(['Total Expenses', '', '', '', total_expenses, ''])
+            writer.writerow(['Net Balance', '', '', '', net_balance, ''])
+            return response
+        
+        elif export_type == 'pdf':
+            buffer = BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), topMargin=30, bottomMargin=30)
+            elements = []
+            
+            # Styles
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'Title',
+                parent=styles['Title'],
+                fontName='Helvetica-Bold',
+                fontSize=16,
+                textColor=colors.darkblue,
+                spaceAfter=20,
+                alignment=1  # Center
+            )
+            normal_style = ParagraphStyle(
+                'Normal',
+                parent=styles['Normal'],
+                fontName='Helvetica',
+                fontSize=10,
+                textColor=colors.black,
+                spaceAfter=10
+            )
+            
+            # Header
+            elements.append(Paragraph(f"Transaction Summary - {month}", title_style))
+            elements.append(Spacer(1, 12))
+            
+            # Transaction Table
+            data = [['Date', 'Type', 'Payee/Payer', 'Category', 'Amount', 'Description']]
+            for t in transactions:
+                data.append([
+                    t.date.strftime('%Y-%m-%d'),
+                    t.type,
+                    t.payee_payer,
+                    t.category,
+                    f"{t.amount:,.2f}",
+                    t.description[:50]
+                ])
+            
+            table = Table(data, colWidths=[80, 80, 120, 100, 80, 150])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.whitesmoke),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ]))
+            elements.append(table)
+            elements.append(Spacer(1, 20))
+            
+            # Summary Section
+            elements.append(Paragraph(f"Total Income: INR {total_income:,.2f}", normal_style))
+            elements.append(Paragraph(f"Total Expenses: INR {total_expenses:,.2f}", normal_style))
+            elements.append(Paragraph(f"Net Balance: INR {net_balance:,.2f}", normal_style))
+            
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
+            response = HttpResponse(buffer, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="transaction_summary_{month}.pdf"'
+            return response
+    
+    return render(request, 'staff/transaction_summary.html', context)
