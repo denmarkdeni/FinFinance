@@ -27,7 +27,25 @@
                   <td>
                     <div class="d-flex align-items-center">
                       <div class="me-4">
-                        <img src="{{ user.profile.profile_pic.url|default:'/static/dashFiles/images/profile/user1.jpg' }}" width="50" class="rounded-circle" alt="" />
+                        <img 
+                          {% if  user.is_superuser %}  
+                            src="/static/dashFiles/images/profile/user1.jpg"
+
+                          {% elif user.profile.role == 'NormalUser' %}
+                            src="{{ user.userprofile.profile_pic.url }}"
+
+                          {% elif user.profile.role == 'CompanyStaff' %}
+                            src="{{ user.staffprofile.profile_pic.url }}"
+
+                          {% elif user.profile.role == 'FinanceExpert' %}
+                            src="{{ user.expertprofile.profile_pic.url }}"
+
+                          {% else %}
+                            src="/static/dashFiles/images/profile/user1.jpg"
+
+                          {% endif %}
+
+                         width="50" class="rounded-circle" alt="" />
                       </div>
                       <div>
                         <h6 class="mb-1 fw-bolder">{{ user.username }}</h6>

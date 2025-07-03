@@ -1,7 +1,183 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
+{% load static %}
 {% block content %}
+  <div class="row">
+    <div class="col-lg-8 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <div>
+              <h5 class="card-title fw-semibold">Company Budget by Month</h5>
+            </div>
+            <div class="dropdown">
+              <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+                class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
+                <i class="ti ti-dots-vertical fs-7 d-block"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </div>
+          </div>
+          <div id="budget-chart" style="width: 100%; height: 360px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="row">
+        <div class="col-lg-12 col-sm-6">
+          <div class="card overflow-hidden">
+            <div class="card-body p-4">
+              <h5 class="card-title mb-10 fw-semibold">Transaction Breakdown</h5>
+              <div class="row align-items-center">
+                <div class="col-7">
+                  <h4 class="fw-semibold mb-3">₹{{ transaction_data.data|length }}</h4>
+                  <div class="d-flex align-items-center mb-2">
+                    <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-arrow-up-left text-success"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">0%</p>
+                    <p class="fs-3 mb-0">last year</p>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <div class="me-3">
+                      <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                      <span class="fs-2">Incoming</span>
+                    </div>
+                    <div>
+                      <span class="round-8 bg-danger rounded-circle me-2 d-inline-block"></span>
+                      <span class="fs-2">Outgoing</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-5">
+                  <div class="d-flex justify-content-center">
+                    <div id="grade" style="width: 150px; height: 150px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <div class="row align-items-start">
+                <div class="col-8">
+                  <h5 class="card-title mb-10 fw-semibold">Total Net Amount</h5>
+                  <h4 class="fw-semibold mb-3">₹{{ total_net|floatformat:2 }}</h4>
+                  <div class="d-flex align-items-center pb-1">
+                    <span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-arrow-up-left text-success"></i>
+                    </span>
+                    <p class="text-dark me-1 fs-3 mb-0">0%</p>
+                    <p class="fs-3 mb-0">last year</p>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="d-flex justify-content-end">
+                    <div class="text-white bg-primary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                      <i class="ti ti-currency-rupee fs-6"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div id="earning" style="width: 100%; height: 60px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-4 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <div class="mb-4">
+            <h5 class="card-title fw-semibold">Recent Transactions</h5>
+          </div>
+          <ul class="timeline-widget mb-0 position-relative mb-n5">
+            {% for transaction in recent_transactions %}
+            <li class="timeline-item d-flex position-relative overflow-hidden">
+              <div class="timeline-time text-dark flex-shrink-0 text-end">{{ transaction.date|date:"d M" }}</div>
+              <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                <span class="timeline-badge border-2 border {% if transaction.type == 'Incoming' %}border-success{% else %}border-danger{% endif %} flex-shrink-0 my-2"></span>
+                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+              </div>
+              <div class="timeline-desc fs-3 text-dark mt-n1">
+                {{ transaction.type }} ₹{{ transaction.amount|floatformat:2 }} to {{ transaction.payee_payer }} on {{ transaction.date|date:"d M Y" }}
+              </div>
+            </li>
+            {% empty %}
+            <li class="timeline-item d-flex position-relative overflow-hidden">
+              <div class="timeline-desc fs-3 text-dark mt-n1">No recent transactions.</div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <div class="d-flex mb-4 justify-content-between align-items-center">
+            <h5 class="mb-0 fw-bold">Top Net Amount Months</h5>
+            <div class="dropdown">
+              <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
+                class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
+                <i class="ti ti-dots-vertical fs-7 d-block"></i>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton1">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Month</th>
+                  <th scope="col">Total Income</th>
+                  <th scope="col">Total Expenses</th>
+                  <th scope="col">Net Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for month in top_months %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div>
+                        <h6 class="mb-1 fw-bolder">{{ month.month }}</h6>
+                      </div>
+                    </div>
+                  </td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ month.total_income|default:0|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ month.total_expenses|default:0|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0 text-success">₹{{ month.net_amount|default:0|floatformat:2 }}</p></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center">No transactions found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-
-
+<script id="chart-data" type="application/json">
+{
+  "budget_chart_data": {{ budget_chart_data|safe }},
+  "transaction_data": {{ transaction_data|safe }},
+  "net_trend_data": {{ net_trend_data|safe }}
+}
+</script>
 {% endblock %}

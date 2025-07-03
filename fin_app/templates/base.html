@@ -190,22 +190,40 @@
                 </a>
               </li>
               <li class="sidebar-item">
-                <a
-                  class="sidebar-link primary-hover-bg justify-content-between"
-                  href="{% url 'dashboard' %}"
-                  aria-expanded="false"
-                >
+                <a class="sidebar-link primary-hover-bg justify-content-between has-arrow" href="javascript:void(0)"
+                  aria-expanded="false">
                   <div class="d-flex align-items-center gap-6">
                     <span class="d-flex">
-                      <iconify-icon
-                        icon="solar:document-line-duotone"
-                      ></iconify-icon>
+                      <iconify-icon icon="solar:widget-4-line-duotone"></iconify-icon>
                     </span>
-                    <span class="hide-menu">Reports</span>
+                    <span class="hide-menu">Budgets</span>
                   </div>
                 </a>
+                <ul aria-expanded="false" class="collapse first-level">
+                  <li class="sidebar-item">
+                    <a class="sidebar-link primary-hover-bg justify-content-between"
+                      href="{% url 'user_budget_history' %}">
+                      <div class="d-flex align-items-center gap-6">
+                        <span class="d-flex">
+                          <span class="icon-small"></span>
+                        </span>
+                        <span class="hide-menu">💨 User History</span>
+                      </div>
+                    </a>
+                  </li>
+                  <li class="sidebar-item">
+                    <a class="sidebar-link primary-hover-bg justify-content-between"
+                      href="{% url 'company_budget_history' %}">
+                      <div class="d-flex align-items-center gap-6">
+                        <span class="d-flex">
+                          <span class="icon-small"></span>
+                        </span>
+                        <span class="hide-menu"> 💨 Staff History</span>
+                      </div>
+                    </a>
+                  </li>
+                </ul>
               </li>
-              
 
               {% elif request.user.profile.role == 'NormalUser' %}
 
@@ -527,6 +545,10 @@
     <script src="/static/dashFiles/libs/simplebar/dist/simplebar.js"></script>
     <script src="/static/dashFiles/js/transaction.js"></script>
     <script src="/static/dashFiles/js/dashboard.js"></script>
+    <script src="/static/dashFiles/js/normal_user_dashboard.js"></script>
+    <script src="/static/dashFiles/js/staff_dashboard.js"></script>
+    <script src="/static/dashFiles/js/expert_dashboard.js"></script>
+    <script src="/static/dashFiles/js/budget_history.js"></script>
     <!-- solar icons -->
     <script src="https://cdn.jsdelivr.net/npm/iconify-icon@1.0.8/dist/iconify-icon.min.js"></script>
 

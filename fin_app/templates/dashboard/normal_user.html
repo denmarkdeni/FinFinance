@@ -7,7 +7,7 @@
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-1">
             <div>
-              <h5 class="card-title fw-semibold">Appointments by Month</h5>
+              <h5 class="card-title fw-semibold">Budget by Month</h5>
             </div>
             <div class="dropdown">
               <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
@@ -30,10 +30,10 @@
         <div class="col-lg-12 col-sm-6">
           <div class="card overflow-hidden">
             <div class="card-body p-4">
-              <h5 class="card-title mb-10 fw-semibold">Appointment Status</h5>
+              <h5 class="card-title mb-10 fw-semibold">Top Categories</h5>
               <div class="row align-items-center">
                 <div class="col-7">
-                  <h4 class="fw-semibold mb-3">{{ total_appointments }}</h4>
+                  <h4 class="fw-semibold mb-3">{{ category_data.data|length }}</h4>
                   <div class="d-flex align-items-center mb-2">
                     <span class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
                       <i class="ti ti-arrow-up-left text-success"></i>
@@ -44,19 +44,7 @@
                   <div class="d-flex align-items-center">
                     <div class="me-3">
                       <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                      <span class="fs-2">Completed</span>
-                    </div>
-                    <div>
-                      <span class="round-8 bg-danger rounded-circle me-2 d-inline-block"></span>
-                      <span class="fs-2">Pending</span>
-                    </div>
-                    <div>
-                      <span class="round-8 bg-success rounded-circle me-2 d-inline-block"></span>
-                      <span class="fs-2">Confirmed</span>
-                    </div>
-                    <div>
-                      <span class="round-8 bg-warning rounded-circle me-2 d-inline-block"></span>
-                      <span class="fs-2">Cancelled</span>
+                      <span class="fs-2">Categories</span>
                     </div>
                   </div>
                 </div>
@@ -74,8 +62,8 @@
             <div class="card-body">
               <div class="row align-items-start">
                 <div class="col-8">
-                  <h5 class="card-title mb-10 fw-semibold">Total Appointments</h5>
-                  <h4 class="fw-semibold mb-3">{{ total_appointments }}</h4>
+                  <h5 class="card-title mb-10 fw-semibold">Total Budgeted</h5>
+                  <h4 class="fw-semibold mb-3">₹{{ total_budgeted|floatformat:2 }}</h4>
                   <div class="d-flex align-items-center pb-1">
                     <span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
                       <i class="ti ti-arrow-up-left text-success"></i>
@@ -87,7 +75,7 @@
                 <div class="col-4">
                   <div class="d-flex justify-content-end">
                     <div class="text-white bg-primary rounded-circle p-6 d-flex align-items-center justify-content-center">
-                      <i class="ti ti-calendar fs-6"></i>
+                      <i class="ti ti-currency-rupee fs-6"></i>
                     </div>
                   </div>
                 </div>
@@ -104,23 +92,23 @@
       <div class="card w-100">
         <div class="card-body p-4">
           <div class="mb-4">
-            <h5 class="card-title fw-semibold">Recent Appointments</h5>
+            <h5 class="card-title fw-semibold">Recent Bookings</h5>
           </div>
           <ul class="timeline-widget mb-0 position-relative mb-n5">
-            {% for appointment in recent_appointments %}
+            {% for booking in recent_bookings %}
             <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-time text-dark flex-shrink-0 text-end">{{ appointment.date_time|date:"H:i" }}</div>
+              <div class="timeline-time text-dark flex-shrink-0 text-end">{{ booking.date_time|date:"H:i" }}</div>
               <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                <span class="timeline-badge border-2 border {% if appointment.status == 'Pending' %}border-warning{% elif appointment.status == 'Completed' %}border-success{% elif appointment.status == 'Cancelled' %}border-danger{% else %}border-primary{% endif %} flex-shrink-0 my-2"></span>
+                <span class="timeline-badge border-2 border {% if booking.status == 'Pending' %}border-warning{% elif booking.status == 'Completed' %}border-success{% elif booking.status == 'Cancelled' %}border-danger{% else %}border-primary{% endif %} flex-shrink-0 my-2"></span>
                 <span class="timeline-badge-border d-block flex-shrink-0"></span>
               </div>
               <div class="timeline-desc fs-3 text-dark mt-n1">
-                {{ appointment.user.username }} on {{ appointment.date_time|date:"d M Y" }} ({{ appointment.status }})
+                Booked {{ booking.expert.username }} on {{ booking.date_time|date:"d M Y" }} ({{ booking.status }})
               </div>
             </li>
             {% empty %}
             <li class="timeline-item d-flex position-relative overflow-hidden">
-              <div class="timeline-desc fs-3 text-dark mt-n1">No recent appointments.</div>
+              <div class="timeline-desc fs-3 text-dark mt-n1">No recent bookings.</div>
             </li>
             {% endfor %}
           </ul>
@@ -131,7 +119,7 @@
       <div class="card w-100">
         <div class="card-body p-4">
           <div class="d-flex mb-4 justify-content-between align-items-center">
-            <h5 class="mb-0 fw-bold">Top Appointments by Feedback</h5>
+            <h5 class="mb-0 fw-bold">Top Budget Months</h5>
             <div class="dropdown">
               <button id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false"
                 class="rounded-circle btn-transparent rounded-circle btn-sm px-1 btn shadow-none">
@@ -148,29 +136,29 @@
             <table class="table table-borderless align-middle text-nowrap">
               <thead>
                 <tr>
-                  <th scope="col">User</th>
-                  <th scope="col">Date</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Rating</th>
+                  <th scope="col">Month</th>
+                  <th scope="col">Total Budgeted</th>
+                  <th scope="col">Total Expenses</th>
+                  <th scope="col">Savings</th>
                 </tr>
               </thead>
               <tbody>
-                {% for appointment in top_appointments %}
+                {% for month in top_months %}
                 <tr>
                   <td>
                     <div class="d-flex align-items-center">
                       <div>
-                        <h6 class="mb-1 fw-bolder">{{ appointment.user.username }}</h6>
+                        <h6 class="mb-1 fw-bolder">{{ month.month }}</h6>
                       </div>
                     </div>
                   </td>
-                  <td><p class="fs-3 fw-normal mb-0">{{ appointment.date_time|date:"d M Y" }}</p></td>
-                  <td><p class="fs-3 fw-normal mb-0">{{ appointment.status }}</p></td>
-                  <td><p class="fs-3 fw-normal mb-0 text-success">{{ appointment.avg_rating|floatformat:1|default:"N/A" }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ month.total_budgeted|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ month.total_expenses|default:0|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0 text-success">₹{{ month.savings|default:0|floatformat:2 }}</p></td>
                 </tr>
                 {% empty %}
                 <tr>
-                  <td colspan="4" class="text-center">No appointments found.</td>
+                  <td colspan="4" class="text-center">No budgets found.</td>
                 </tr>
                 {% endfor %}
               </tbody>
@@ -183,9 +171,9 @@
 
 <script id="chart-data" type="application/json">
 {
-  "appointment_chart_data": {{ appointment_chart_data|safe }},
-  "status_data": {{ status_data|safe }},
-  "appointment_trend_data": {{ appointment_trend_data|safe }}
+  "budget_chart_data": {{ budget_chart_data|safe }},
+  "category_data": {{ category_data|safe }},
+  "budget_trend_data": {{ budget_trend_data|safe }}
 }
 </script>
 {% endblock %}

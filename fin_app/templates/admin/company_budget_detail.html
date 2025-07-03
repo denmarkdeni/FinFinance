@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <a href="{% url 'company_budget_history' %}" class="btn btn-outline-secondary">Back to Company Budget History</a>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+      <div class="card w-100">
+        <div class="card-body p-4">
+          <h5 class="mb-4 fw-bold">Transaction Details for {{ username }}</h5>
+          <div class="mb-4">
+            <a href="{% url 'export_company_budget_detail_pdf' user_id %}" class="btn btn-outline-primary">Export as PDF</a>
+          </div>
+          <div class="table-responsive" data-simplebar>
+            <table class="table table-borderless align-middle text-nowrap">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Type</th>
+                  <th scope="col">Payee/Payer</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for transaction in transactions %}
+                <tr>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.date }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.type }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.payee_payer }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.category }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">₹{{ transaction.amount|floatformat:2 }}</p></td>
+                  <td><p class="fs-3 fw-normal mb-0">{{ transaction.description }}</p></td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="6" class="text-center">No transactions found.</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -30,14 +30,20 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
 
     path('dashboard/', views.dashboard_view, name='dashboard'),
-    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'),
-    path('dashboard/normal/', views.normal_dashboard, name='normal_dashboard'),
+    path('dashboard/admin/', views.admin_dashboard, name='admin_dashboard'), 
+    path('dashboard/normal/', views.normal_user_dashboard, name='normal_dashboard'),
     path('dashboard/staff/', views.staff_dashboard, name='staff_dashboard'),
     path('dashboard/expert/', views.expert_dashboard, name='expert_dashboard'),
 
     path('dashboard/admin/users/', views.user_management, name='user_management'),
     path('dashboard/admin/users/<int:user_id>/toggle-status/', views.toggle_user_status, name='toggle_user_status'),
     path('dashboard/admin/experts/history/', views.experts_history, name='experts_history'),
+    path('dashboard/admin/user-budget-history/', views.user_budget_history, name='user_budget_history'),
+    path('dashboard/admin/user-budget-detail/<int:user_id>/', views.user_budget_detail, name='user_budget_detail'),
+    path('dashboard/admin/user-budget-detail/<int:user_id>/export-pdf/', views.export_user_budget_detail_pdf, name='export_user_budget_detail_pdf'),
+    path('dashboard/admin/company-budget-history/', views.company_budget_history, name='company_budget_history'),
+    path('dashboard/admin/company-budget-detail/<int:user_id>/', views.company_budget_detail, name='company_budget_detail'),
+    path('dashboard/admin/company-budget-detail/<int:user_id>/export-pdf/', views.export_company_budget_detail_pdf, name='export_company_budget_detail_pdf'),
 
     path('profile/', views.profile, name='profile'),
     path('profile/normal/', views.user_profile, name='user_profile'),

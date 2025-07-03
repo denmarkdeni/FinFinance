@@ -7,12 +7,12 @@ $(function () {
   let chartData;
   try {
     chartData = JSON.parse(document.getElementById('chart-data').textContent);
-    console.log("Chart data:", chartData);
+    // console.log("Chart data:", chartData);
   } catch (e) {
     console.error('JSON parse error:', e, document.getElementById('chart-data').textContent);
     return;
   }
-  console.log("Script running");
+  // console.log("Script running");
 
   const budgetChartData = chartData.budget_chart_data || { labels: [], data: [] };
   const profit = {

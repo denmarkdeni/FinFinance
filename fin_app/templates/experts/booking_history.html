@@ -2,7 +2,12 @@
 {% block content %}
   <div class="row mb-4">
     <div class="col-12">
-      <a href="{% url 'experts_list' %}" class="btn btn-outline-secondary">Back to Experts</a>
+      <a {% if request.user.profile.role == 'NormalUser' %}
+      href="{% url 'experts_list' %}"
+    {% elif user.profile.role == 'FinanceExpert' %}
+      href="{% url 'experts_appointments' %}"
+    {% endif %}
+     class="btn btn-outline-secondary">Back to Experts</a>
     </div>
   </div>
   <div class="row">
@@ -14,7 +19,13 @@
             <table class="table table-borderless align-middle text-nowrap">
               <thead>
                 <tr>
-                  <th scope="col">Expert/User</th>
+                  <th scope="col">
+                  {% if request.user.profile.role == 'NormalUser' %}
+                    Expert
+                  {% else %}
+                    User
+                  {% endif %}
+                </th>
                   <th scope="col">Date and Time</th>
                   <th scope="col">Status</th>
                   <th scope="col">Action</th>
