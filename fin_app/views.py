@@ -608,6 +608,71 @@ def emi_calculator(request):
     return render(request, 'features/emi_calculator.html', {'emi_result': emi_result})
 
 @login_required
+def tax_calculator(request):
+    taxable_income = None
+    in_hand_amount = None
+    tax = None
+    regime = request.POST.get('regime', 'New')
+    income = request.POST.get('income', 0)
+    age = request.POST.get('age', 'below_60')
+    deductions = request.POST.get('deductions', 0)
+
+    if request.method == 'POST':
+        try:
+            income = float(income)
+            deductions = float(deductions) if deductions else 0
+
+            if regime == 'New':
+                taxable_income = max(0, income - 75000)  # Standard deduction
+                tax = 0
+                if taxable_income > 2400000:
+                    tax = (taxable_income - 2400000) * 0.3 + 360000
+                elif taxable_income > 2000000:
+                    tax = (taxable_income - 2000000) * 0.25 + 210000
+                elif taxable_income > 1600000:
+                    tax = (taxable_income - 1600000) * 0.2 + 130000
+                elif taxable_income > 1200000:
+                    tax = (taxable_income - 1200000) * 0.15 + 70000
+                elif taxable_income > 800000:
+                    tax = (taxable_income - 800000) * 0.1 + 30000
+                elif taxable_income > 400000:
+                    tax = (taxable_income - 400000) * 0.05
+                if taxable_income <= 1200000:  # Rebate u/s 87A
+                    tax = max(0, tax - 60000)
+            else:  # Old regime
+                exemption = 250000 if age == 'below_60' else 300000 if age == '60_80' else 500000
+                taxable_income = max(0, income - 50000 - min(deductions, 150000))  # Standard + 80C
+                tax = 0
+                if taxable_income > 1000000:
+                    tax = (taxable_income - 1000000) * 0.3 + 112500
+                elif taxable_income > 500000:
+                    tax = (taxable_income - 500000) * 0.2 + 12500
+                elif taxable_income > exemption:
+                    tax = (taxable_income - exemption) * 0.05
+                if taxable_income <= 500000:  # Rebate u/s 87A
+                    tax = max(0, tax - 12500)
+            
+            # Add 4% Health & Education Cess
+            tax = tax * 1.04
+            in_hand_amount = income - tax
+            taxable_income = round(taxable_income, 2)
+            tax = round(tax, 2)
+            in_hand_amount = round(in_hand_amount, 2)
+        except ValueError:
+            pass
+
+    context = {
+        'regime': regime,
+        'income': income,
+        'age': age,
+        'deductions': deductions,
+        'taxable_income': taxable_income,
+        'tax': tax,
+        'in_hand_amount': in_hand_amount
+    }
+    return render(request, 'features/tax_calculator.html', context)
+
+@login_required
 def experts_list(request):
     if request.user.profile.role != 'NormalUser':
         messages.error(request, 'Only normal users can book experts.')
@@ -796,7 +861,7 @@ def company_transaction_management(request):
     month_filter = request.GET.get('month', current_month)
     category_filter = request.GET.get('category', '')
     
-    transactions = CompanyTransaction.objects.filter(month=month_filter)
+    transactions = CompanyTransaction.objects.filter(month=month_filter, created_by=request.user)
     if category_filter:
         transactions = transactions.filter(category=category_filter)
     
@@ -868,7 +933,7 @@ def transaction_summary(request, month):
         messages.error(request, 'Only company staff can access transaction summary.')
         return redirect('dashboard')
     
-    transactions = CompanyTransaction.objects.filter(month=month).order_by('-date')
+    transactions = CompanyTransaction.objects.filter(month=month,created_by=request.user).order_by('-date')
     total_income = transactions.filter(type='Incoming').aggregate(total=Sum('amount'))['total'] or 0
     total_expenses = transactions.filter(type='Outgoing').aggregate(total=Sum('amount'))['total'] or 0
     net_balance = total_income - total_expenses

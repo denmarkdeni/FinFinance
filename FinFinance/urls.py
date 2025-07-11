@@ -59,6 +59,7 @@ urlpatterns = [
     path('expenses/add/', views.add_expense, name='add_expense'),
 
     path('features/emi-calculator/', views.emi_calculator, name='emi_calculator'),
+    path('features/tax-calculator/', views.tax_calculator, name='tax_calculator'),
 
     path('experts/', views.experts_list, name='experts_list'),
     path('experts/book/<int:expert_id>/', views.book_expert, name='book_expert'),

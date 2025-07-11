@@ -54,7 +54,12 @@
         <div class="row align-items-center">
           
           <div class="col-6 col-xl-2">
-            <h1 class="mb-0 site-logo"><a href="index.html" class="h2 mb-0">Fin Finance<span class="text-primary">.</span> </a></h1>
+            <h1 class="mb-0 site-logo">
+              <a class="d-flex justify-content-center" href="/">
+                <img src="/static/dashFiles/images/logos/finfinance.png" alt="" width="300"/>
+                <span class="text-primary"></span>
+              </a>
+            </h1>
           </div>
 
           <div class="col-12 col-md-10 d-none d-xl-block">
@@ -62,7 +67,8 @@
 
               <ul class="site-menu main-menu js-clone-nav mr-auto d-none d-lg-block">
                 <li><a href="#home-section" class="nav-link">Home</a></li>
-                <li class="has-children">
+                <li><a href="#about-section" class="nav-link">About</a></li>
+                {% comment %} <li class="has-children">
                   <a href="#about-section" class="nav-link">About Us</a>
                   <ul class="dropdown">
                     <li><a href="#team-section" class="nav-link">Team</a></li>
@@ -80,8 +86,7 @@
                       </ul>
                     </li>
                   </ul>
-                </li>
-                
+                </li> {% endcomment %}
                 
                 <li><a href="#blog-section" class="nav-link">Blog</a></li>
                 <li><a href="#contact-section" class="nav-link">Contact</a></li>
@@ -203,13 +208,8 @@
         
       </div>  
     </div>
-
     
-
-   
-
-    
-    <section class="site-section border-bottom" id="team-section">
+    <!--<section class="site-section border-bottom" id="team-section">
       <div class="container">
         <div class="row mb-5 justify-content-center">
           <div class="col-md-8 text-center">
@@ -281,7 +281,7 @@
       </div>
     </section>
 
-    <!-- <section class="site-section" id="gallery-section" data-aos="fade">
+     <section class="site-section" id="gallery-section" data-aos="fade">
       
 
       <div class="container">

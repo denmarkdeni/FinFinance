@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+  <h5 class="card-title fw-semibold mb-4">Tax Calculator</h5>
+  <div class="card p-4">
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Tax Regime</label>
+        <div class="d-flex">
+          <div class="form-check me-3">
+            <input class="form-check-input" type="radio" name="regime" id="newRegime" value="New" {% if regime == 'New' %}checked{% endif %} onchange="toggleFields()">
+            <label class="form-check-label" for="newRegime">New Regime</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="radio" name="regime" id="oldRegime" value="Old" {% if regime == 'Old' %}checked{% endif %} onchange="toggleFields()">
+            <label class="form-check-label" for="oldRegime">Old Regime</label>
+          </div>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="income" class="form-label fw-semibold">Annual Income (₹)</label>
+        <input type="number" class="form-control" id="income" name="income" value="{{ income|default:0 }}" required>
+      </div>
+      <div class="mb-3" id="ageField" {% if regime == 'New' %}style="display: none;"{% endif %}>
+        <label for="age" class="form-label fw-semibold">Age</label>
+        <select class="form-select" id="age" name="age">
+          <option value="below_60" {% if age == 'below_60' %}selected{% endif %}>Below 60</option>
+          <option value="60_80" {% if age == '60_80' %}selected{% endif %}>60 to 80</option>
+          <option value="above_80" {% if age == 'above_80' %}selected{% endif %}>Above 80</option>
+        </select>
+      </div>
+      <div class="mb-3" id="deductionsField" {% if regime == 'New' %}style="display: none;"{% endif %}>
+        <label for="deductions" class="form-label fw-semibold">Deductions (₹, e.g., 80C up to 1.5L)</label>
+        <input type="number" class="form-control" id="deductions" name="deductions" value="{{ deductions|default:0 }}">
+      </div>
+      <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+  </div>
+  {% if tax is not None %}
+  <div class="card p-4 mt-3">
+    <h6 class="fw-semibold">Results ({{ regime }} Regime)</h6>
+    <p class="fs-3 mb-1">Taxable Income: ₹{{ taxable_income }}</p>
+    <p class="fs-3 mb-1">Tax Amount: ₹{{ tax }}</p>
+    <p class="fs-3 mb-0">In-Hand Amount: ₹{{ in_hand_amount }}</p>
+  </div>
+  {% endif %}
+
+<script>
+function toggleFields() {
+  const newRegime = document.getElementById('newRegime').checked;
+  document.getElementById('ageField').style.display = newRegime ? 'none' : 'block';
+  document.getElementById('deductionsField').style.display = newRegime ? 'none' : 'block';
+}
+</script>
+{% endblock %}
