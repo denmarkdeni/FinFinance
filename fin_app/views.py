@@ -616,6 +616,8 @@ def tax_calculator(request):
     income = request.POST.get('income', 0)
     age = request.POST.get('age', 'below_60')
     deductions = request.POST.get('deductions', 0)
+    tax_explanation = []
+    taxable_income_explanation = []
 
     if request.method == 'POST':
         try:
@@ -624,40 +626,78 @@ def tax_calculator(request):
 
             if regime == 'New':
                 taxable_income = max(0, income - 75000)  # Standard deduction
+                taxable_income_explanation.append(f"Started with income: ₹{income:,.2f}")
+                taxable_income_explanation.append(f"Subtracted standard deduction: ₹75,000")
+                taxable_income_explanation.append(f"Taxable income: ₹{taxable_income:,.2f}")
                 tax = 0
                 if taxable_income > 2400000:
                     tax = (taxable_income - 2400000) * 0.3 + 360000
+                    tax_explanation.append(f"Tax on income above ₹24,00,000 at 30%: ₹{(taxable_income - 2400000) * 0.3:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹3,60,000")
                 elif taxable_income > 2000000:
                     tax = (taxable_income - 2000000) * 0.25 + 210000
+                    tax_explanation.append(f"Tax on income above ₹20,00,000 at 25%: ₹{(taxable_income - 2000000) * 0.25:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹2,10,000")
                 elif taxable_income > 1600000:
                     tax = (taxable_income - 1600000) * 0.2 + 130000
+                    tax_explanation.append(f"Tax on income above ₹16,00,000 at 20%: ₹{(taxable_income - 1600000) * 0.2:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹1,30,000")
                 elif taxable_income > 1200000:
                     tax = (taxable_income - 1200000) * 0.15 + 70000
+                    tax_explanation.append(f"Tax on income above ₹12,00,000 at 15%: ₹{(taxable_income - 1200000) * 0.15:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹70,000")
                 elif taxable_income > 800000:
                     tax = (taxable_income - 800000) * 0.1 + 30000
+                    tax_explanation.append(f"Tax on income above ₹8,00,000 at 10%: ₹{(taxable_income - 800000) * 0.1:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹30,000")
                 elif taxable_income > 400000:
                     tax = (taxable_income - 400000) * 0.05
+                    tax_explanation.append(f"Tax on income above ₹4,00,000 at 5%: ₹{(taxable_income - 400000) * 0.05:,.2f}")
+                else:
+                    tax_explanation.append("No tax as income is below ₹4,00,000")
                 if taxable_income <= 1200000:  # Rebate u/s 87A
+                    old_tax = tax
                     tax = max(0, tax - 60000)
+                    if old_tax > 0:
+                        tax_explanation.append(f"Applied rebate u/s 87A: -₹60,000")
             else:  # Old regime
                 exemption = 250000 if age == 'below_60' else 300000 if age == '60_80' else 500000
                 taxable_income = max(0, income - 50000 - min(deductions, 150000))  # Standard + 80C
+                taxable_income_explanation.append(f"Started with income: ₹{income:,.2f}")
+                taxable_income_explanation.append(f"Subtracted standard deduction: ₹50,000")
+                taxable_income_explanation.append(f"Subtracted deductions (up to 1.5 lakh): ₹{min(deductions, 150000):,.2f}")
+                taxable_income_explanation.append(f"Subtracted exemption for age {age.replace('_', ' ')}: ₹{exemption:,.2f}")
+                taxable_income_explanation.append(f"Taxable income: ₹{taxable_income:,.2f}")
                 tax = 0
                 if taxable_income > 1000000:
                     tax = (taxable_income - 1000000) * 0.3 + 112500
+                    tax_explanation.append(f"Tax on income above ₹10,00,000 at 30%: ₹{(taxable_income - 1000000) * 0.3:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹1,12,500")
                 elif taxable_income > 500000:
                     tax = (taxable_income - 500000) * 0.2 + 12500
+                    tax_explanation.append(f"Tax on income above ₹5,00,000 at 20%: ₹{(taxable_income - 500000) * 0.2:,.2f}")
+                    tax_explanation.append(f"Plus tax from lower slabs: ₹12,500")
                 elif taxable_income > exemption:
                     tax = (taxable_income - exemption) * 0.05
+                    tax_explanation.append(f"Tax on income above ₹{exemption:,.0f} at 5%: ₹{(taxable_income - exemption) * 0.05:,.2f}")
+                else:
+                    tax_explanation.append(f"No tax as income is below ₹{exemption:,.0f}")
                 if taxable_income <= 500000:  # Rebate u/s 87A
+                    old_tax = tax
                     tax = max(0, tax - 12500)
+                    if old_tax > 0:
+                        tax_explanation.append(f"Applied rebate u/s 87A: -₹12,500")
             
             # Add 4% Health & Education Cess
+            old_tax = tax
             tax = tax * 1.04
+            if old_tax > 0:
+                tax_explanation.append(f"Added 4% Health & Education Cess: ₹{(tax - old_tax):,.2f}")
             in_hand_amount = income - tax
             taxable_income = round(taxable_income, 2)
             tax = round(tax, 2)
             in_hand_amount = round(in_hand_amount, 2)
+            tax_explanation.append(f"Final tax amount: ₹{tax:,.2f}")
         except ValueError:
             pass
 
@@ -668,7 +708,9 @@ def tax_calculator(request):
         'deductions': deductions,
         'taxable_income': taxable_income,
         'tax': tax,
-        'in_hand_amount': in_hand_amount
+        'in_hand_amount': in_hand_amount,
+        'tax_explanation': tax_explanation,
+        'taxable_income_explanation': taxable_income_explanation
     }
     return render(request, 'features/tax_calculator.html', context)
 
