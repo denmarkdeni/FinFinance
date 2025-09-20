@@ -23,7 +23,7 @@ staticfiles/
 node_modules/
 npm-debug.log
 yarn-error.log
-dist/
+# dist/
 build/
 
 # Ignore IDE/editor files
